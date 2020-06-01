@@ -1,0 +1,49 @@
+信息系统与数据库技术练习12答题卡
+
+班级：     信息管理一班
+姓名：     余晓伟
+学号：     20190307109
+
+注：请将答案放置在序号下方。*/
+
+（一）
+/*1、打开PROJECT数据库。*/
+USE PROJECT
+/*2、在Project表中，按项目名称(Pname)降序建立非聚集不唯一索引，
+名称为ix_project。*/
+CREATE INDEX ix_project
+ON Project(Pname DESC)
+/*3、在Employee表中，按性别(Esex)、工作日期(WorkDate)建立非聚
+集不唯一索引，名称为ix_date。其中性别降序、工作日期升序。*/
+CREATE INDEX ix_date
+ON Employee(WorkDate ASC,Esex DESC)
+/*4、在Sale表中，按项目号(Pid)、年份(SYear)、月份(SMonth)
+建立一个非聚集唯一索引，名称为ix_sale。*/
+CREATE UNIQUE INDEX ix_sale
+ON Department(Pid,SYear,SMonth)
+/*5、创建索引视图v_wages，在Department、Employee、
+EP、Project表中查询部门号(Did)、部门名(Dname)、雇员号(Eid)、
+姓名(Ename)、工作日期(WorkDate)、项目号(Pid)、项目名(Pname)
+和报酬(Wages)。*/
+CREATE VIEW v_wages
+WITH SCHEMABINDING
+AS
+SELECT Department.Did,Dname,Employee.Eid,Ename,WorkDate,EP.Pid,Pname,Wages
+FROM dbo.Department JOIN dbo.Employee JOIN dbo.EP JOIN dbo.Project
+ON Project.Pid=EP.Pid
+ON Employee.Eid=EP.Eid
+ON Department.Did=Employee.Did
+/*6、在v_wages视图中按雇员号(Eid)、项目号(Pid)建立唯一聚集索引
+ix_wagex。雇员号升序，项目号降序。*/
+CREATE UNIQUE CLUSTERED INDEX ix_wagex
+ON v_wages(Eid,Pid)
+/*8、查看Employee表所有索引信息。*/
+EXEC sp_helpindex Employee
+/*9、将v_wages视图的索引标识ix_workDate改为ix_Date。*/
+EXEC sp_rename 'v_wages.ix_workDate',ix_Date
+/*10、查看v_wages视图所有索引信息。*/
+EXEC sp_helpindex v_wages
+/*11、删除Project表的ix_project索引*/
+DROP INDEX ix_project ON Project
+/*12、重新组织Sale表的ix_sale索引。*/
+ALTER INDEX ix_sale ON Sale REORGANIZE
